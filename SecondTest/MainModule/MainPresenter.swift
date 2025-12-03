@@ -30,6 +30,8 @@ final class MainPresenter: MainPresenterProtocol {
     }
     
     func loadIcons(term: String) {
+        if isLoading { return }
+        
         guard !term.isEmpty else {
             self.icons = []
             self.isEmpty = true

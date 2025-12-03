@@ -20,13 +20,8 @@ final class EmptyView: UIView {
     
     let image: UIImageView = {
         let image = UIImageView(image: UIImage(systemName: "magnifyingglass"))
+        image.tintColor = .secondaryLabel
         return image
-    }()
-    
-    let textfield: UITextField = {
-        let textfield = UITextField()
-        textfield.placeholder = "Search icons"
-        return textfield
     }()
 }
 
@@ -41,22 +36,18 @@ private extension EmptyView {
     func setupSubviews() {
         addSubview(label)
         addSubview(image)
-        addSubview(textfield)
     }
     
     func setupConstraints() {
-        textfield.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-        }
-        
         image.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.centerY.equalToSuperview()
+            make.size.equalTo(150)
         }
         
         label.snp.makeConstraints { make in
             make.top.equalTo(image.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview()
+            make.centerX.equalToSuperview()
         }
         
     }

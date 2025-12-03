@@ -27,10 +27,7 @@ final class MainViewController: ViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private lazy var mainView: MainView = {
-        let view = MainView(presenter: presenter)
-        return view
-    }()
+    private lazy var mainView = MainView()
     
     override func loadView() {
         self.view = mainView
@@ -40,6 +37,22 @@ final class MainViewController: ViewController {
         super.viewDidLoad()
         mainView.iconsTableView.tableView.delegate = self
         mainView.iconsTableView.tableView.dataSource = self
+        mainView.textfield.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        mainView.textfield.addTarget(self, action: #selector(cancelTapped), for: .editingDidBegin)
+        
+        print("MainViewController Loaded")
+        showEmpty(text: "Start Searching")
+    }
+    
+    @objc private func textFieldDidChange(_ textfield: UITextField) {
+        guard let text = textfield.text else { return }
+        presenter.loadIcons(term: text)
+    }
+    
+    @objc private func cancelTapped() {
+        mainView.textfield.text = ""
+        mainView.textfield.resignFirstResponder()
+        mainView.setSearchMode(active: false)
     }
 }
 
@@ -71,16 +84,20 @@ extension MainViewController: MainViewProtocol {
     }
     
     func showLoading() {
-        <#code#>
+        
     }
     
     func hideLoading() {
-        <#code#>
+        
     }
     
     func showIcons() {
-        <#code#>
+        
     }
-    
-    
+}
+
+extension MainViewController: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        mainView.setSearchMode(active: true)
+    }
 }

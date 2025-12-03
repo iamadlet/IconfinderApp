@@ -9,10 +9,8 @@ import UIKit
 import SnapKit
 
 final class IconsTableView: UIView {
-    private var presenter: MainPresenterProtocol
     
-    init(presenter: MainPresenterProtocol) {
-        self.presenter = presenter
+    init() {
         super.init(frame: .zero)
         commonInit()
     }
@@ -26,12 +24,6 @@ final class IconsTableView: UIView {
         tableView.register(IconCell.self, forCellReuseIdentifier: IconCell.reuseIdentifier)
         return tableView
     }()
-    
-    let textfield: UITextField = {
-        let textfield = UITextField()
-        textfield.placeholder = "Search icons"
-        return textfield
-    }()
 }
 
 extension IconsTableView {
@@ -43,16 +35,11 @@ extension IconsTableView {
     
     func setupSubviews() {
         addSubview(tableView)
-        addSubview(textfield)
     }
     
     func setupConstraints() {
-        textfield.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-        }
-        
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(textfield).offset(16)
+            make.top.equalTo(self.safeAreaLayoutGuide).offset(16)
             make.bottom.leading.trailing.equalToSuperview()
         }
         
