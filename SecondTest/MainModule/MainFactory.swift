@@ -1,21 +1,28 @@
-//
-//  MainFactory.swift
-//  SecondTest
-//
-//  Created by Адлет Жумагалиев on 25.11.2025.
-//
-
 import UIKit
 
 final class MainFactory {
     func make() -> UIViewController {
-        let host = "https://api.freepik.com"
-        let networkClient = NetworkClient(host: host)
+        let host = "api.freepik.com"
+        let networkClient = NetworkClient(host: host, token: Secrets.apiKey)
         let service = IconService(networkClient: networkClient)
         
-        let presenter = MainPresenter(service: service)
+        let imageDownloadService = ImageDownloadService()
+        let photoLibraryService = PhotoLibraryService()
+        let iconSaveService = IconSaveService(
+            imageDownloadService: imageDownloadService,
+            photoLibraryService: photoLibraryService
+        )
+        
+        let executor = CancellableExecutor()
+        
+        let presenter = MainPresenter(
+            service: service,
+            iconSaveService: iconSaveService,
+            executor: executor
+        )
         
         let vc = MainViewController(presenter: presenter)
+        presenter.view = vc
         
         return vc
     }

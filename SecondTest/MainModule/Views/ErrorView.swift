@@ -1,8 +1,7 @@
 import UIKit
 import SnapKit
 
-final class EmptyView: UIView {
-    
+final class ErrorView: UIView {
     init() {
         super.init(frame: .zero)
         commonInit()
@@ -14,19 +13,19 @@ final class EmptyView: UIView {
     
     let label: UILabel = {
         let label = UILabel()
-        label.text = "Start searching icons"
+        label.text = "Oops! Something went wrong"
         return label
     }()
     
     let image: UIImageView = {
-        let image = UIImageView(image: UIImage(systemName: "magnifyingglass"))
+        let image = UIImageView(image: UIImage(systemName: "exclamationmark.triangle"))
         image.tintColor = .secondaryLabel
         return image
     }()
+    
 }
 
-
-private extension EmptyView {
+private extension ErrorView {
     func commonInit() {
         backgroundColor = .systemBackground
         setupSubviews()

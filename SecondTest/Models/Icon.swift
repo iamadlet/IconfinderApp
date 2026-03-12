@@ -1,5 +1,9 @@
 import Foundation
 
+struct IconsListResponse: Decodable {
+    let data: [IconResponse]
+}
+
 struct IconResponse: Decodable {
     let id: Int
     let name: String
@@ -21,7 +25,7 @@ struct Tag: Decodable {
 
 struct IconRequest: ApiRequestProtocol {
     
-    typealias Response = IconResponse
+    typealias Response = IconsListResponse
     
     var endpoint: String { "/v1/icons" }
     
@@ -54,7 +58,7 @@ extension IconModel {
             return nil
         }
         self.imageURL = response.thumbnails.first!.url
-        self.tags = response.tags.map { $0.slug }.dropLast(response.tags.count - (response.tags.count - 10))
+        self.tags = Array(response.tags.map { $0.slug }.prefix(10))
         self.width = String(biggestSize.width)
         self.height = String(biggestSize.height)
     }

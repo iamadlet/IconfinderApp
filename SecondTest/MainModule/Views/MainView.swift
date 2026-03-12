@@ -1,10 +1,3 @@
-//
-//  MainView.swift
-//  SecondTest
-//
-//  Created by Адлет Жумагалиев on 03.12.2025.
-//
-
 import Foundation
 import UIKit
 
@@ -12,7 +5,7 @@ final class MainView: UIView {
     
     init() {
         super.init(frame: .zero)
-        commonIni()
+        commonInit()
     }
     
     required init?(coder: NSCoder) {
@@ -26,7 +19,7 @@ final class MainView: UIView {
     }()
     
     lazy var emptyView: EmptyView = {
-        let view = EmptyView()
+        let view = EmptyView(text: "Start searching icons")
         view.isHidden = true
         return view
     }()
@@ -37,9 +30,17 @@ final class MainView: UIView {
         return view
     }()
     
+    lazy var errorView: ErrorView = {
+        let view = ErrorView()
+        view.isHidden = true
+        return view
+    }()
+    
     let textfield: UITextField = {
         let textfield = UITextField()
         textfield.placeholder = "Search icons"
+        textfield.returnKeyType = .search
+        textfield.enablesReturnKeyAutomatically = true
         return textfield
     }()
     
@@ -78,7 +79,7 @@ final class MainView: UIView {
 }
 
 private extension MainView {
-    func commonIni() {
+    func commonInit() {
         backgroundColor = .systemBackground
         setupSubviews()
         setupConstraints()

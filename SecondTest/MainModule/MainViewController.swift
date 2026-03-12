@@ -1,10 +1,3 @@
-//
-//  MainView.swift
-//  SecondTest
-//
-//  Created by Адлет Жумагалиев on 25.11.2025.
-//
-
 import UIKit
 
 protocol MainViewProtocol: AnyObject {
@@ -13,6 +6,8 @@ protocol MainViewProtocol: AnyObject {
     func showLoading()
     func hideLoading()
     func showIcons()
+    func scrollToTop()
+    func showMessage(title: String, message: String)
 }
 
 final class MainViewController: ViewController {
@@ -37,13 +32,14 @@ final class MainViewController: ViewController {
         super.viewDidLoad()
         mainView.iconsTableView.tableView.delegate = self
         mainView.iconsTableView.tableView.dataSource = self
-        mainView.textfield.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        mainView.textfield.addTarget(self, action: #selector(cancelTapped), for: .editingDidBegin)
+        mainView.textfield.delegate = self
+        mainView.cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         
         print("MainViewController Loaded")
-        showEmpty(text: "Start Searching")
+        showEmpty(text: "Start Searching icons")
     }
     
+    // MARK: - Не нужен уже этот метод
     @objc private func textFieldDidChange(_ textfield: UITextField) {
         guard let text = textfield.text else { return }
         presenter.loadIcons(term: text)
@@ -53,6 +49,8 @@ final class MainViewController: ViewController {
         mainView.textfield.text = ""
         mainView.textfield.resignFirstResponder()
         mainView.setSearchMode(active: false)
+        self.hideLoading()
+        self.showEmpty(text: "Start searching again")
     }
 }
 
@@ -66,38 +64,94 @@ extension MainViewController: UITableViewDataSource, UITableViewDelegate {
             return UITableViewCell()
         }
         
-        let icon = presenter.getIcons()[indexPath.row]
+        let icon = presenter.icon(at: indexPath.row)
         cell.configureCell(with: icon)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        presenter.didSelectIcon(at: indexPath.row)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
 extension MainViewController: MainViewProtocol {
     func showError() {
-        hideLoading()
+        mainView.emptyView.isHidden = true
+        mainView.loadingView.isHidden = true
+        mainView.iconsTableView.isHidden = true
+        mainView.errorView.isHidden = false
+        mainView.bringSubviewToFront(mainView.errorView)
     }
     
     func showEmpty(text: String) {
+        mainView.loadingView.isHidden = true
+        mainView.iconsTableView.isHidden = true
+        mainView.errorView.isHidden = true
         mainView.emptyView.isHidden = false
-        mainView.iconsTableView.bringSubviewToFront(mainView.emptyView)
+        mainView.bringSubviewToFront(mainView.emptyView)
     }
     
     func showLoading() {
-        
+        mainView.emptyView.isHidden = true
+        mainView.iconsTableView.isHidden = true
+        mainView.errorView.isHidden = true
+        mainView.loadingView.isHidden = false
+        mainView.bringSubviewToFront(mainView.loadingView)
     }
     
     func hideLoading() {
-        
+        mainView.loadingView.isHidden = true
     }
     
     func showIcons() {
+        if !Thread.isMainThread {
+            print("🚨 [FATAL ERROR] showIcons вызван НЕ из главного потока!")
+        }
         
+        print("👀 [MainVC] Показываю таблицу и обновляю данные")
+        
+        mainView.loadingView.isHidden = true
+        mainView.emptyView.isHidden = true
+        mainView.errorView.isHidden = true
+        mainView.iconsTableView.isHidden = false
+        
+        mainView.iconsTableView.tableView.reloadData()
+        
+        mainView.bringSubviewToFront(mainView.iconsTableView)
+        scrollToTop()
+    }
+    
+    func scrollToTop() {
+        guard presenter.getIcons().count > 0 else { return }
+        let indexPath = IndexPath(row: 0, section: 0)
+        mainView.iconsTableView.tableView.scrollToRow(
+            at: indexPath,
+            at: .top,
+            animated: true
+        )
+    }
+    
+    func showMessage(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
 
 extension MainViewController: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         mainView.setSearchMode(active: true)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        
+        if let text = textField.text, !text.isEmpty {
+            presenter.loadIcons(term: text)
+        }
+        
+        return true
     }
 }

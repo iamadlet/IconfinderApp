@@ -12,10 +12,10 @@ class IconService: IconServiceProtocol {
     }
     
     func fetchIcons(request: IconRequest, completion: @escaping (Result<[IconModel], ApiClientError>) -> Void) {
-        networkClient.send(request: request) { (result: Result<[IconResponse], ApiClientError>) in
+        networkClient.send(request: request) { (result: Result<IconsListResponse, ApiClientError>) in
             switch result {
-            case .success(let responses):
-                let models = responses.compactMap { IconModel(response: $0) }
+            case .success(let listResponse):
+                let models = listResponse.data.compactMap { IconModel(response: $0) }
                 completion(.success(models))
             case .failure(let error):
                 completion(.failure(error))

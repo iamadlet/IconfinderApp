@@ -11,13 +11,12 @@ protocol ApiRequestProtocol {
 }
 
 extension ApiRequestProtocol {
-    
     var parameters: [URLQueryItem]? {
         return nil
     }
     
     var headers: [String: String]? {
-        return ["Content-type": "application/json"]
+        return ["x-freepik-api-key": "\(Secrets.apiKey)"]
     }
     
     func makeRequest(host: String) -> URLRequest? {

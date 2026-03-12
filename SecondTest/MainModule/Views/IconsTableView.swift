@@ -1,10 +1,3 @@
-//
-//  MainView.swift
-//  SecondTest
-//
-//  Created by Адлет Жумагалиев on 25.11.2025.
-//
-
 import UIKit
 import SnapKit
 
@@ -22,6 +15,7 @@ final class IconsTableView: UIView {
     let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(IconCell.self, forCellReuseIdentifier: IconCell.reuseIdentifier)
+        tableView.rowHeight = 100
         return tableView
     }()
 }

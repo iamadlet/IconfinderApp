@@ -2,54 +2,50 @@ import Foundation
 
 protocol NetworkClientProtocol {
     var host: String { get }
-    func send<T: ApiRequestProtocol>(request: T, completion: @escaping (Result<[T.Response], ApiClientError>) -> Void)
+    func send<T: ApiRequestProtocol>(request: T, completion: @escaping (Result<T.Response, ApiClientError>) -> Void)
 }
 
 struct NetworkClient: NetworkClientProtocol {
     let host: String
+    private let token: String
     
-    init(host: String) {
+    init(host: String, token: String) {
         self.host = host
+        self.token = token
     }
     
-    func send<T: ApiRequestProtocol>(request: T, completion: @escaping (Result<[T.Response], ApiClientError>) -> Void) {
+    func send<T: ApiRequestProtocol>(request: T, completion: @escaping (Result<T.Response, ApiClientError>) -> Void) {
         guard let request = request.makeRequest(host: host) else {
-            main(.failure(ApiClientError.request), completion)
+            completion(.failure(ApiClientError.request))
             return
         }
         
         let task = URLSession.shared.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
             guard error == nil, let httpResponse = response as? HTTPURLResponse else {
-                main(.failure(ApiClientError.network), completion)
+                completion(.failure(ApiClientError.network))
                 return
             }
             
             guard let data = data else {
-                main(.failure(ApiClientError.empty), completion)
+                completion(.failure(ApiClientError.empty))
                 return
             }
             
             guard httpResponse.statusCode == 200 else {
-                main(.failure(ApiClientError.service(httpResponse.statusCode)), completion)
+                completion(.failure(ApiClientError.service(httpResponse.statusCode)))
                 return
             }
             
             let decoder = JSONDecoder()
             
-            guard let result = try? decoder.decode([T.Response].self, from: data) else {
-                main(.failure(ApiClientError.deserialize), completion)
+            guard let result = try? decoder.decode(T.Response.self, from: data) else {
+                completion(.failure(ApiClientError.deserialize))
                 return
             }
             
-            main(.success(result), completion)
+            completion(.success(result))
         }
         task.resume()
-    }
-    
-    private func main<T>(_ value: T, _ completion: @escaping (T) -> Void) {
-        DispatchQueue.main.async {
-            completion(value)
-        }
     }
 }
 
